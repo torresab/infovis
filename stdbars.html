@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>bar chart</title>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+</head>
+<body>
+
+ <div id="vis"></div>
+  
+ <script>
+   // SQL que sale de https://data.world/makeovermonday/2019w31/
+
+var url = "https://download.data.world/s/js3a66ji7574lojgso36jqk7nk2o42";
+
+/**
+var datos = [
+  {"disease":"Primary and Secondary Syphilis","sum":205913},
+  {"disease":"Gonorrhea","sum":6454097},
+  {"disease":"Chlamydia","sum":18991264}
+]; 
+**/
+
+// leyendo el CSV de la URL
+d3.csv( url )
+  .then(function(data) {
+    var max = 0;
+    data.forEach(function(d) {
+      d.sum = +d.sum;
+      if (d.sum > max) {
+        max = d.sum;
+      }
+    });
+    console.log(max);
+    doit(data,max);
+  })
+  .catch(function(error){
+     console.log(error);  
+  })
+
+function doit(datos,maximo) {
+  var max_w = 350;
+
+  var x = d3.scaleLinear()
+    .domain([0, maximo])
+    .range([0, max_w]);
+
+var y = d3.scaleLinear()
+    .domain([0, 2])
+    .range([0, 200]);
+
+
+var svg = d3.select("div#vis").append("svg")
+  .attr("width",500)
+  .attr("height",300);
+
+svg.selectAll("rect").data(datos).enter().append("rect")
+   .attr("fill","steelblue")
+   .attr("x", 10)
+   .attr("y", function(d,i) {return y(i);})
+   .attr("width", function(d,i) {return x(d.sum);})
+   .attr("height",99)
+
+svg.selectAll("txt_tit").data(datos).enter().append("text")
+   .attr("class","txt_tit")
+   .attr("x", function(d) {return 20 + x(d.sum);}  )
+   .attr("y", function(d,i) {return 30+y(i);})
+   .text( function(d) {return d.disease;}  )
+
+svg.selectAll("txt_val").data(datos).enter().append("text")
+   .attr("class","txt_val")
+   .attr("x", function(d) {return 20 + x(d.sum);}  )
+   .attr("y", function(d,i) {return 60+y(i);})
+   .text( function(d) {return d.sum.toLocaleString();}  )
+
+}
+</script>
+  
+</body>
+</html>
